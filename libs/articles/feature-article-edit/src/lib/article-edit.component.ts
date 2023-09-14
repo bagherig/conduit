@@ -5,7 +5,7 @@ import { Validators } from '@angular/forms';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { articleActions, articleEditActions, articleQuery } from '@realworld/articles/data-access';
-import {map, take} from "rxjs";
+import { map, take } from 'rxjs';
 
 const structure: Field[] = [
   {
@@ -64,21 +64,26 @@ export class ArticleEditComponent implements OnInit, OnDestroy {
 
   submit() {
     // Subscribe to the current tagList from the store to get its value
-    this.store.select(ngrxFormsQuery.selectData).pipe(
-      take(1),  // Take only the first emitted value
-      map(data => {
-        // Process the tagList: split by commas, trim whitespace, and filter out any empty tags
-        const processedTagList = data.tagList.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag);
+    this.store
+      .select(ngrxFormsQuery.selectData)
+      .pipe(
+        take(1), // Take only the first emitted value
+        map((data) => {
+          // Process the tagList: split by commas, trim whitespace, and filter out any empty tags
+          const processedTagList = data.tagList
+            .split(',')
+            .map((tag: string) => tag.trim())
+            .filter((tag: string) => tag);
 
-        // Update the tagList in the store with the processed tags
-        this.store.dispatch(formsActions.updateData({ data: { tagList: processedTagList } }));
+          // Update the tagList in the store with the processed tags
+          this.store.dispatch(formsActions.updateData({ data: { tagList: processedTagList } }));
 
-        // Dispatch the action to publish the article
-        this.store.dispatch(articleEditActions.publishArticle());
-      })
-    ).subscribe();
+          // Dispatch the action to publish the article
+          this.store.dispatch(articleEditActions.publishArticle());
+        }),
+      )
+      .subscribe();
   }
-
 
   ngOnDestroy() {
     this.store.dispatch(formsActions.initializeForm());
