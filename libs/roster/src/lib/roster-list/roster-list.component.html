@@ -1,0 +1,24 @@
+<h2>Conduit Roster</h2>
+
+<div *ngIf="loading$ | async; else rosterTable">Loading...</div>
+
+<ng-template #rosterTable>
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Total Articles</th>
+        <th>Total Likes</th>
+        <th>First Article Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of rosterData$ | async">
+        <td><a [routerLink]="['/profile', user.username]">{{ user.username }}</a></td>
+        <td>{{ user.totalArticles }}</td>
+        <td>{{ user.totalLikes }}</td>
+        <td>{{ user.firstArticleDate | date }}</td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>
