@@ -54,7 +54,9 @@ export class ArticleController {
     @Body('article') articleData: CreateArticleDto,
   ) {
     // Todo: update slug also when title gets changed
-    return this.articleService.update(+user, params.slug, articleData);
+    const { authors, ...restArticleData } = articleData;
+
+    return this.articleService.update(+user, params.slug, restArticleData, authors);
   }
 
   @ApiOperation({ summary: 'Delete article' })

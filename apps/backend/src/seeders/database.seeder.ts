@@ -17,7 +17,7 @@ export class DatabaseSeeder extends Seeder {
 
     const articles = [
       em.create(Article, {
-        author: authors.bennie,
+        authors: [authors.bennie],
         slug: 'how-to-do-something',
         title: 'How to do something',
         description: 'Lorem ipsum dolor sit amet',
@@ -28,7 +28,7 @@ export class DatabaseSeeder extends Seeder {
         updatedAt: new Date(),
       }),
       em.create(Article, {
-        author: authors.zolly,
+        authors: [authors.zolly],
         slug: 'how-to-do-something-else',
         title: 'How to do something else',
         tagList: [tags.coding.tag, tags.angular.tag],
@@ -58,7 +58,7 @@ export class DatabaseSeeder extends Seeder {
         username: 'John Costen',
         bio: 'Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.',
         image: 'http://dummyimage.com/168x100.png/5fa2dd/ffffff',
-        password: 'e56a207acd1e6714735487c199c6f095844b7cc8e5971d86c003a7b6f36ef51e', // password
+        password: 'e56a207acd1e6714735487c199c6f095844b7cc8e5971d86c003a7b6f36ef51e',
       }),
       bennie: em.create(User, {
         email: 'bbebbell1@earthlink.net',

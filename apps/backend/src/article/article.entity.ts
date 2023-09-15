@@ -2,8 +2,7 @@ import {
   ArrayType,
   Collection,
   Entity,
-  EntityDTO,
-  ManyToOne,
+  EntityDTO, ManyToMany,
   OneToMany,
   PrimaryKey,
   Property,
@@ -40,8 +39,8 @@ export class Article {
   @Property({ type: ArrayType })
   tagList: string[] = [];
 
-  @ManyToOne(() => User)
-  author: User;
+  @ManyToMany(() => User)
+  authors = new Collection<User>(this);
 
   @OneToMany(() => Comment, (comment) => comment.article, { eager: true, orphanRemoval: true })
   comments = new Collection<Comment>(this);
@@ -50,17 +49,17 @@ export class Article {
   favoritesCount = 0;
 
   constructor(author: User, title: string, description: string, body: string) {
-    this.author = author;
-    this.title = title;
-    this.description = description;
-    this.body = body;
-    this.slug = slug(title, { lower: true }) + '-' + ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
+      this.authors.add(author);
+      this.title = title;
+      this.description = description;
+      this.body = body;
+      this.slug = slug(title, { lower: true }) + '-' + ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
   }
 
   toJSON(user?: User) {
     const o = wrap<Article>(this).toObject() as ArticleDTO;
     o.favorited = user && user.favorites.isInitialized() ? user.favorites.contains(this) : false;
-    o.author = this.author.toJSON(user);
+    o.authors = this.authors.toArray().map(author => wrap(author).toObject());
 
     return o;
   }

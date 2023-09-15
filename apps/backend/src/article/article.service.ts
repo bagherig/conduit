@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import { EntityManager, QueryOrder, wrap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/mysql';
@@ -75,9 +75,9 @@ export class ArticleService {
       ? await this.userRepository.findOne(userId, { populate: ['followers', 'favorites'] })
       : undefined;
     const res = await this.articleRepository.findAndCount(
-      { author: { followers: userId } },
+      { authors: { followers: userId } },
       {
-        populate: ['author'],
+        populate: ['authors'],
         orderBy: { createdAt: QueryOrder.DESC },
         limit: +query.limit,
         offset: +query.offset,
@@ -92,12 +92,12 @@ export class ArticleService {
     const user = userId
       ? await this.userRepository.findOneOrFail(userId, { populate: ['followers', 'favorites'] })
       : undefined;
-    const article = await this.articleRepository.findOne(where, { populate: ['author'] });
+    const article = await this.articleRepository.findOne(where, { populate: ['authors'] });
     return { article: article && article.toJSON(user) } as IArticleRO;
   }
 
   async addComment(userId: number, slug: string, dto: CreateCommentDto) {
-    const article = await this.articleRepository.findOneOrFail({ slug }, { populate: ['author'] });
+    const article = await this.articleRepository.findOneOrFail({ slug }, { populate: ['authors'] });
     const author = await this.userRepository.findOneOrFail(userId);
     const comment = new Comment(author, article, dto.body);
     await this.em.persistAndFlush(comment);
@@ -106,7 +106,7 @@ export class ArticleService {
   }
 
   async deleteComment(userId: number, slug: string, id: number): Promise<IArticleRO> {
-    const article = await this.articleRepository.findOneOrFail({ slug }, { populate: ['author'] });
+    const article = await this.articleRepository.findOneOrFail({ slug }, { populate: ['authors'] });
     const user = await this.userRepository.findOneOrFail(userId);
     const comment = this.commentRepository.getReference(id);
 
@@ -119,7 +119,7 @@ export class ArticleService {
   }
 
   async favorite(id: number, slug: string): Promise<IArticleRO> {
-    const article = await this.articleRepository.findOneOrFail({ slug }, { populate: ['author'] });
+    const article = await this.articleRepository.findOneOrFail({ slug }, { populate: ['authors'] });
     const user = await this.userRepository.findOneOrFail(id, { populate: ['favorites', 'followers'] });
 
     if (!user.favorites.contains(article)) {
@@ -132,7 +132,7 @@ export class ArticleService {
   }
 
   async unFavorite(id: number, slug: string): Promise<IArticleRO> {
-    const article = await this.articleRepository.findOneOrFail({ slug }, { populate: ['author'] });
+    const article = await this.articleRepository.findOneOrFail({ slug }, { populate: ['authors'] });
     const user = await this.userRepository.findOneOrFail(id, { populate: ['followers', 'favorites'] });
 
     if (user.favorites.contains(article)) {
@@ -155,6 +155,7 @@ export class ArticleService {
         { populate: ['followers', 'favorites', 'articles'] },
       );
       const article = new Article(user!, dto.title, dto.description, dto.body);
+      article.authors.add(user!);
       article.tagList.push(...dto.tagList);
       user?.articles.add(article);
 
@@ -173,18 +174,43 @@ export class ArticleService {
       return { article: article.toJSON(user!) };
   }
 
+  async update(userId: number, slug: string, articleData: CreateArticleDto, authors: string[] | undefined): Promise<IArticleRO> {
+      const user = await this.userRepository.findOne(
+        { id: userId },
+        { populate: ['followers', 'favorites', 'articles'] },
+      );
 
-  async update(userId: number, slug: string, articleData: any): Promise<IArticleRO> {
-    const user = await this.userRepository.findOne(
-      { id: userId },
-      { populate: ['followers', 'favorites', 'articles'] },
-    );
-    const article = await this.articleRepository.findOne({ slug }, { populate: ['author'] });
-    wrap(article).assign(articleData);
-    await this.em.flush();
+      const article = await this.articleRepository.findOne({ slug }, { populate: ['authors'] });
 
-    return { article: article!.toJSON(user!) };
+      // Check if the articleData contains a new list of authors. If it does, update the authors collection of the article.
+      if (article && authors && authors.length) {
+        const newAuthors = await this.userRepository.find({ email: { $in: authors } });
+        for (const author of newAuthors) {
+          article.authors.add(author);
+        }
+      }
+
+      // Ensure that the original author cannot be removed from the authors collection
+      if (article && !article.authors.contains(user!)) {
+        throw new Error('The original author cannot be removed from the article.');
+      }
+
+      // Assign the rest of the article data
+      const { title, description, body } = articleData;
+      wrap(article).assign({ title, description, body });
+
+      await this.em.flush();
+
+      if (!user) {
+          throw new NotFoundException('User not found');
+      }
+      if (!article) {
+          throw new NotFoundException('Article not found');
+      }
+      return { article: article.toJSON(user) };
+
   }
+
 
   async delete(slug: string) {
     return this.articleRepository.nativeDelete({ slug });
