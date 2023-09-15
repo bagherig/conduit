@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { RosterService } from './roster.service';
 import { of } from 'rxjs';
-import {ApiService} from "@realworld/core/http-client";
+import { ApiService } from '@realworld/core/http-client';
 
 describe('RosterService', () => {
   let service: RosterService;
@@ -14,10 +14,10 @@ describe('RosterService', () => {
         {
           provide: ApiService,
           useValue: {
-            get: jest.fn(() => of([]))
-          }
-        }
-      ]
+            get: jest.fn(() => of([])),
+          },
+        },
+      ],
     });
 
     service = TestBed.inject(RosterService);
@@ -29,7 +29,7 @@ describe('RosterService', () => {
   });
 
   it('should fetch roster data', () => {
-    service.getRosterData().subscribe(data => {
+    service.getRosterData().subscribe((data) => {
       expect(data).toEqual([]);
     });
     expect(apiService.get).toHaveBeenCalledWith('/roster');

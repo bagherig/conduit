@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import {RosterListComponent} from "@conduit/roster";
-import {RosterStoreService} from "@realworld/roster/src/lib/roster.store";
+import { RosterListComponent } from '@conduit/roster';
+import { RosterStoreService } from '@realworld/roster/src/lib/roster.store';
 
 describe('RosterListComponent', () => {
   let component: RosterListComponent;
@@ -16,10 +16,10 @@ describe('RosterListComponent', () => {
           provide: RosterStoreService,
           useValue: {
             rosterData$: of([]),
-            fetchRosterData: jest.fn()
-          }
-        }
-      ]
+            fetchRosterData: jest.fn(),
+          },
+        },
+      ],
     }).compileComponents();
 
     rosterStore = TestBed.inject(RosterStoreService);
