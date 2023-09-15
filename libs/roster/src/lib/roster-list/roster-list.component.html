@@ -14,7 +14,9 @@
     </thead>
     <tbody>
       <tr *ngFor="let user of rosterData$ | async">
-        <td><a [routerLink]="['/profile', user.username]">{{ user.username }}</a></td>
+        <td>
+          <a [routerLink]="['/profile', user.username]">{{ user.username }}</a>
+        </td>
         <td>{{ user.totalArticles }}</td>
         <td>{{ user.totalLikes }}</td>
         <td>{{ user.firstArticleDate | date }}</td>

@@ -10,7 +10,7 @@ import { provideEffects } from '@ngrx/effects';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { API_URL } from '@realworld/core/http-client';
 import { environment } from '../environments/environment';
-import {RosterListComponent} from "@realworld/roster/src/lib/roster-list/roster-list.component";
+import { RosterListComponent } from '@realworld/roster/src/lib/roster-list/roster-list.component';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter([
@@ -43,7 +43,7 @@ export const appConfig: ApplicationConfig = {
       {
         path: 'roster',
         component: RosterListComponent,
-        data: { title: 'Conduit Roster' }
+        data: { title: 'Conduit Roster' },
       },
       {
         path: 'editor',

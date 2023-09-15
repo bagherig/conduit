@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {RosterStoreService} from "@realworld/roster/src/lib/roster.store";
+import { RosterStoreService } from '@realworld/roster/src/lib/roster.store';
 
 @Component({
   selector: 'conduit-roster-list',
